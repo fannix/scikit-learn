@@ -15,7 +15,7 @@ Dataset loading utilities
 .. currentmodule:: sklearn.datasets
 
 The ``sklearn.datasets`` package embeds some small toy datasets
-as introduced in the "Getting Started" section.
+as introduced in the :ref:`Getting Started <loading_example_dataset>` section.
 
 To evaluate the impact of the scale of the dataset (``n_samples`` and
 ``n_features``) while controlling the statistical properties of the data
@@ -34,7 +34,7 @@ require to download any file from some external website.
 
 .. autosummary::
 
-   :toctree: generated/
+   :toctree: ../modules/generated/
    :template: function.rst
 
    load_boston
@@ -80,9 +80,13 @@ Sample generators
 In addition, scikit-learn includes various random sample generators that
 can be used to build artifical datasets of controled size and complexity.
 
+.. figure:: ../auto_examples/images/plot_random_dataset_1.png
+   :target: ../auto_examples/plot_random_dataset.html
+   :align: center
+
 .. autosummary::
 
-   :toctree: generated/
+   :toctree: ../modules/generated/
    :template: function.rst
 
    make_classification
@@ -97,30 +101,30 @@ can be used to build artifical datasets of controled size and complexity.
    make_spd_matrix
    make_swiss_roll
    make_s_curve
-
+   make_sparse_spd_matrix
 
 .. _libsvm_loader:
 
 Datasets in svmlight / libsvm format
 ====================================
 
-scikit-learn includes a fast utility function, ``load_svmlight_format``,  to load
+scikit-learn includes utility functions for loading
 datasets in the svmlight / libsvm format. In this format, each line
 takes the form ``<label> <feature-id>:<feature-value>
 <feature-id>:<feature-value> ...``. This format is especially suitable for sparse datasets.
-Scipy sparse CSR matrices are used for ``X`` and numpy arrays are used for ``y``.
+In this module, scipy sparse CSR matrices are used for ``X`` and numpy arrays are used for ``y``.
 
-You may load a dataset like this::
+You may load a dataset like as follows::
 
   >>> from sklearn.datasets import load_svmlight_file
   >>> X_train, y_train = load_svmlight_file("/path/to/train_dataset.txt")
   ...                                                         # doctest: +SKIP
 
-You may also load two datasets at once::
+You may also load two (or more) datasets at once::
 
-  >>> X_train, y_train, X_test, y_test = load_svmlight_file(
-  ...     "/path/to/train_dataset.txt",
-  ...     "/path/to/test_dataset.txt")                        # doctest: +SKIP
+  >>> X_train, y_train, X_test, y_test = load_svmlight_files(
+  ...     ("/path/to/train_dataset.txt", "/path/to/test_dataset.txt"))
+  ...                                                         # doctest: +SKIP
 
 In this case, ``X_train`` and ``X_test`` are guaranteed to have the same number
 of features. Another way to achieve the same result is to fix the number of
@@ -130,9 +134,11 @@ features::
   ...     "/path/to/test_dataset.txt", n_features=X_train.shape[1])
   ...                                                         # doctest: +SKIP
 
-.. topic:: Public datasets:
+.. topic:: Related links:
 
  _`Public datasets in svmlight / libsvm format`: http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
+
+ _`Faster API-compatible implementation`: https://github.com/mblondel/svmlight-loader
 
 
 .. include:: olivetti_faces.rst 
