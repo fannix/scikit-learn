@@ -18,12 +18,13 @@ are supervised learning methods based on applying Bayes' theorem with strong
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
+from scipy.linalg import norm
 from scipy.sparse import issparse
 
 from .base import BaseEstimator, ClassifierMixin
 from .preprocessing import binarize, LabelBinarizer
 from .utils import array2d, atleast2d_or_csr
-from .utils.extmath import safe_sparse_dot, logsum
+from .utils.extmath import safe_sparse_dot, logsumexp
 
 
 class BaseNB(BaseEstimator, ClassifierMixin):
@@ -74,7 +75,7 @@ class BaseNB(BaseEstimator, ClassifierMixin):
         """
         jll = self._joint_log_likelihood(X)
         # normalize by P(x) = P(f_1, ..., f_n)
-        log_prob_x = logsum(jll, axis=1)
+        log_prob_x = logsumexp(jll, axis=1)
         return jll - np.atleast_2d(log_prob_x).T
 
     def predict_proba(self, X):
@@ -242,12 +243,14 @@ class BaseDiscreteNB(BaseNB):
     def _fit1ofK(self, X, Y, sample_weight, class_prior):
         """Guts of the fit method; takes labels in 1-of-K encoding Y"""
 
+        n_classes = Y.shape[1]
+
         if sample_weight is not None:
             Y *= array2d(sample_weight).T
 
         if class_prior:
             assert len(class_prior) == n_classes, \
-                   'Number of priors must match number of classs'
+                   'Number of priors must match number of classes'
             self.class_log_prior_ = np.log(class_prior)
         elif self.fit_prior:
             # empirical prior, with sample_weight taken into account
@@ -283,7 +286,6 @@ class BaseDiscreteNB(BaseNB):
             labelbin = LabelBinarizer()
             Y = labelbin.fit_transform(y)
             self._classes = labelbin.classes_
-            n_classes = len(self._classes)
             if Y.shape[1] == 1:
                 Y = np.concatenate((1 - Y, Y), axis=1)
         else:
@@ -477,10 +479,15 @@ class SemisupervisedNB(BaseNB):
 
     Parameters
     ----------
-    estimator : BaseDiscreteNB
-        Underlying Naive Bayes estimator.
+    estimator : {BernoulliNB, MultinomialNB}
+        Underlying Naive Bayes estimator. `GaussianNB` is not supported at
+        this moment.
     n_iter : int, optional
         Maximum number of iterations.
+    relabel_all : bool, optional
+        Whether to re-estimate class memberships for labeled samples as well.
+        Disabling this may result in bad performance, but follows Nigam et al.
+        closely.
     tol : float, optional
         Tolerance, per coefficient, for the convergence criterion.
         Convergence is determined based on the coefficients (log probabilities)
@@ -489,9 +496,14 @@ class SemisupervisedNB(BaseNB):
         Whether to print progress information.
     """
 
-    def __init__(self, estimator, n_iter=10, tol=1e-3, verbose=False):
+    def __init__(self, estimator, n_iter=10, relabel_all=True, tol=1e-5,
+                 verbose=False):
+        if not isinstance(estimator, BaseDiscreteNB):
+            raise TypeError("%r is not a supported Naive Bayes classifier"
+                            % (estimator,))
         self.estimator = estimator
         self.n_iter = n_iter
+        self.relabel_all = relabel_all
         self.tol = tol
         self.verbose = verbose
 
@@ -530,12 +542,12 @@ class SemisupervisedNB(BaseNB):
         Y = clf._label_1ofK(y)
 
         labeled = np.where(y != -1)[0]
-        unlabeled = np.where(y == -1)[0]
-        X_unlabeled = X[unlabeled, :]
-        Y_unlabeled = Y[unlabeled, :]
+        if self.relabel_all:
+            unlabeled = np.where(y == -1)[0]
+            X_unlabeled = X[unlabeled, :]
+            Y_unlabeled = Y[unlabeled, :]
 
         n_features = X.shape[1]
-        n_classes = Y.shape[1]
         tol = self.tol * n_features
 
         clf._fit1ofK(X[labeled, :], Y[labeled, :],
@@ -548,10 +560,17 @@ class SemisupervisedNB(BaseNB):
             if self.verbose:
                 print "Naive Bayes EM, iteration %d," % i,
 
+            # E
+            if self.relabel_all:
+                Y = clf.predict_proba(X)
+            else:
+                Y_unlabeled[:] = clf.predict_proba(X_unlabeled)
+
+            # M
             clf._fit1ofK(X, Y, sample_weight, class_prior)
 
-            d = (np.abs(old_coef - clf.coef_).sum()
-               + np.abs(old_intercept - clf.intercept_).sum())
+            d = (norm(old_coef - clf.coef_, 1)
+               + norm(old_intercept - clf.intercept_, 1))
             if self.verbose:
                 print "diff = %.3g" % d
             if d < tol:
@@ -561,7 +580,6 @@ class SemisupervisedNB(BaseNB):
 
             old_coef[:] = clf.coef_
             old_intercept[:] = clf.intercept_
-            Y_unlabeled[:] = clf.predict_proba(X_unlabeled)
 
         return self
 
