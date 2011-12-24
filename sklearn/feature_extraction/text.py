@@ -456,8 +456,10 @@ class TfidfTransformer(BaseEstimator, TransformerMixin):
         extra document was seen containing every term in the collection
         exactly once. Prevents zero divisions.
 
-    References
-    ----------
+    Notes
+    -----
+    **References**:
+
     R. Baeza-Yates and B. Ribeiro-Neto (2011). Modern Information Retrieval.
         Addison Wesley, pp. 68–74.
     C.D. Manning, H. Schütze and P. Raghavan (2008). Introduction to
@@ -485,6 +487,7 @@ class TfidfTransformer(BaseEstimator, TransformerMixin):
                 # bincount might return fewer bins than there are features
                 df = np.concatenate([df, np.zeros(n_features - df.shape[0])])
             df += int(self.smooth_idf)
+            n_samples += int(self.smooth_idf)
             self.idf_ = np.log(float(n_samples) / df)
 
         return self

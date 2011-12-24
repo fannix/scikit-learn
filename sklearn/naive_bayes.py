@@ -119,21 +119,6 @@ class GaussianNB(BaseNB):
     sigma : array, shape = [n_classes, n_features]
         variance of each feature per class
 
-    Methods
-    -------
-    fit(X, y) : self
-        Fit the model
-
-    predict(X) : array
-        Predict using the model.
-
-    predict_proba(X) : array
-        Predict the probability of each class using the model.
-
-    predict_log_proba(X) : array
-        Predict the log-probability of each class using the model.
-
-
     Examples
     --------
     >>> import numpy as np
@@ -315,20 +300,6 @@ class MultinomialNB(BaseDiscreteNB):
         Whether to learn class prior probabilities or not.
         If false, a uniform prior will be used.
 
-    Methods
-    -------
-    fit(X, y) : self
-        Fit the model
-
-    predict(X) : array
-        Predict using the model.
-
-    predict_proba(X) : array
-        Predict the probability of each class using the model.
-
-    predict_log_proba(X) : array
-        Predict the log probability of each class using the model.
-
     Attributes
     ----------
     `intercept_`, `class_log_prior_` : array, shape = [n_classes]
@@ -352,8 +323,8 @@ class MultinomialNB(BaseDiscreteNB):
     >>> print clf.predict(X[2])
     [3]
 
-    References
-    ----------
+    Notes
+    -----
     For the rationale behind the names `coef_` and `intercept_`, i.e.
     naive Bayes as a linear classifier, see J. Rennie et al. (2003),
     Tackling the poor assumptions of naive Bayes text classifiers, ICML.
@@ -390,20 +361,6 @@ class BernoulliNB(BaseDiscreteNB):
         Whether to learn class prior probabilities or not.
         If false, a uniform prior will be used.
 
-    Methods
-    -------
-    fit(X, y) : self
-        Fit the model
-
-    predict(X) : array
-        Predict using the model.
-
-    predict_proba(X) : array
-        Predict the probability of each class using the model.
-
-    predict_log_proba(X) : array
-        Predict the log probability of each class using the model.
-
     Attributes
     ----------
     `class_log_prior_` : array, shape = [n_classes]
@@ -424,8 +381,10 @@ class BernoulliNB(BaseDiscreteNB):
     >>> print clf.predict(X[2])
     [3]
 
-    References
-    ----------
+    Notes
+    -----
+    **References**:
+
     C.D. Manning, P. Raghavan and H. Schütze (2008). Introduction to
     Information Retrieval. Cambridge University Press, pp. 234–265.
 

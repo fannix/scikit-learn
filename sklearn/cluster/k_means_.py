@@ -23,7 +23,6 @@ from ..utils import check_random_state
 from ..utils import atleast2d_or_csr
 from ..utils import as_float_array
 from ..utils import safe_asarray
-from ..utils.sparsefuncs import mean_variance_axis0
 
 from . import _k_means
 
@@ -857,16 +856,6 @@ class MiniBatchKMeans(KMeans):
         given, it fixes the seed. Defaults to the global numpy random
         number generator.
 
-    Methods
-    -------
-
-    fit(X):
-        Compute K-Means clustering
-
-    partial_fit(X):
-        Compute a partial K-Means clustering for streaming large scale data
-        into the estimator with incremental fitting.
-
     Attributes
     ----------
 
@@ -882,9 +871,9 @@ class MiniBatchKMeans(KMeans):
         defined as the sum of square distances of samples to their nearest
         neighbor.
 
-    References
-    ----------
-    http://www.eecs.tufts.edu/~dsculley/papers/fastkmeans.pdf
+    Notes
+    -----
+    See http://www.eecs.tufts.edu/~dsculley/papers/fastkmeans.pdf
     """
 
     def __init__(self, k=8, init='k-means++', max_iter=100,

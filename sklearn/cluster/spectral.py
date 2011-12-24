@@ -177,8 +177,10 @@ def spectral_clustering(affinity, k=8, n_components=None, mode=None,
     centers: array of integers, shape: k
         The indices of the cluster centers
 
-    References
-    ----------
+    Notes
+    -----
+    **References**:
+
     - Normalized cuts and image segmentation, 2000
       Jianbo Shi, Jitendra Malik
       http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.160.2324
@@ -237,20 +239,16 @@ class SpectralClustering(BaseEstimator):
         centroid seeds. The final results will be the best output of
         n_init consecutive runs in terms of inertia.
 
-    Methods
-    -------
-
-    fit(X):
-        Compute spectral clustering
-
     Attributes
     ----------
 
     labels_:
         Labels of each point
 
-    References
-    ----------
+    Notes
+    -----
+    **References**:
+
     - Normalized cuts and image segmentation, 2000
       Jianbo Shi, Jitendra Malik
       http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.160.2324
